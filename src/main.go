@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/WilliwadelmaWisky/SqlDatabase/nlp"
-	"github.com/WilliwadelmaWisky/SqlDatabase/util"
+	"github.com/WilliwadelmaWisky/DatabaseSQL/nlp"
+	"github.com/WilliwadelmaWisky/DatabaseSQL/util"
 )
 
 func main() {
