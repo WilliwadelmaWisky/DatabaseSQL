@@ -1,4 +1,4 @@
-package nlp
+package sql
 
 type Token struct {
 	Type  TokenType
@@ -131,25 +131,3 @@ const (
 	GreaterThan
 	Parenthesis
 )
-
-func Evaluate(tokens []Token) {
-	switch tokens[0].Value {
-	case "CREATE":
-	case "SELECT":
-		evaluateSelect(tokens[1:])
-	case "UPDATE":
-	case "DELETE":
-	default:
-		return
-	}
-}
-
-func evaluateSelect(tokens []Token) {
-	columns := make([]Token, 0)
-
-	for _, token := range tokens {
-		if token == columns[0] {
-			break
-		}
-	}
-}

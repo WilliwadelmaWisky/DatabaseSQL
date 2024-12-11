@@ -11,6 +11,7 @@
 
 ## Supported SQL
 The database supports all the basic CRUD operations Examples on the supported sql syntax below.
+If you want to use values with spaces, only single quotes are supported.
 
 ### Create
 
@@ -21,8 +22,13 @@ The database supports all the basic CRUD operations Examples on the supported sq
 ```sql
 CREATE TABLE <table> (
     <column> INT,
-    <column> VARCHAR(<length>)
+    <column> VARCHAR(50)
 )
+```
+
+```sql
+INSERT INTO <table> ( <column>, <column> ) 
+VALUES ( 10, 'Text' )
 ```
 
 ### Read
@@ -34,7 +40,10 @@ CREATE TABLE <table> (
 ```sql
 SELECT <column|*> FROM <table>
 WHERE <condition>
-ORDER BY <column> <ASC|DESC>
+ORDER BY (
+    <column> <ASC|DESC>,
+    <column> <ASC|DESC>
+)
 ```
 
 ### Update
@@ -44,11 +53,8 @@ ORDER BY <column> <ASC|DESC>
 </p>
 
 ```sql
-UPDATE <table>
-SET (
-    <name> = 10,
-    <name> = 'Text'
-)
+UPDATE <table> ( <column>, <column> )
+VALUES ( 10, 'Text' )
 WHERE <condition>
 ```
 
