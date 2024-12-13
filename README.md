@@ -22,7 +22,7 @@ If you want to use values with spaces, only single quotes are supported.
 ```sql
 CREATE TABLE <table> (
     <column> INT,
-    <column> VARCHAR(50)
+    <column> VARCHAR
 )
 ```
 

@@ -1,4 +1,4 @@
-package server
+package sql
 
 import (
 	"fmt"
@@ -13,22 +13,22 @@ type Server struct {
 
 type Route struct {
 	URI     string
-	Methods []Method
+	Methods []HttpMethod
 	Handler http.HandlerFunc
 }
 
 // Http method
-type Method int
+type HttpMethod int
 
 const (
-	GET    Method = 1
-	POST   Method = 2
-	PUT    Method = 4
-	DELETE Method = 8
-	ANY    Method = GET | POST | PUT | DELETE
+	HTTP_GET    HttpMethod = 1
+	HTTP_POST   HttpMethod = 2
+	HTTP_PUT    HttpMethod = 4
+	HTTP_DELETE HttpMethod = 8
+	HTTP_ALL    HttpMethod = HTTP_GET | HTTP_POST | HTTP_PUT | HTTP_DELETE
 )
 
-func (s Server) ListenAndServe() {
+func (s *Server) ListenAndServe() {
 	for _, route := range s.Routes {
 		http.HandleFunc(route.URI, func(w http.ResponseWriter, r *http.Request) {
 			if r.RequestURI != route.URI || !containsMethod(route.Methods, r.Method) {
@@ -44,23 +44,23 @@ func (s Server) ListenAndServe() {
 	http.ListenAndServe(s.Addr, nil)
 }
 
-func getMethodFromString(method string) (Method, error) {
+func getMethodFromString(method string) (HttpMethod, error) {
 	s := strings.ToUpper(method)
 	switch {
 	case s == "" || s == "GET":
-		return GET, nil
+		return HTTP_GET, nil
 	case s == "POST":
-		return POST, nil
+		return HTTP_POST, nil
 	case s == "PUT":
-		return PUT, nil
+		return HTTP_PUT, nil
 	case s == "DELETE":
-		return DELETE, nil
+		return HTTP_DELETE, nil
 	}
 
 	return -1, fmt.Errorf("invalid method as input: %s", method)
 }
 
-func getFlagValue(methods []Method) int {
+func GetFlag(methods []HttpMethod) int {
 	value := 0
 	for _, method := range methods {
 		value = value | int(method)
@@ -69,11 +69,12 @@ func getFlagValue(methods []Method) int {
 	return value
 }
 
-func containsMethod(methods []Method, method string) bool {
+func containsMethod(methods []HttpMethod, method string) bool {
 	m, err := getMethodFromString(method)
 	if err != nil {
 		return false
 	}
 
-	return getFlagValue(methods)&int(m) == int(m)
+	flag := GetFlag(methods)
+	return flag|int(m) == flag
 }
