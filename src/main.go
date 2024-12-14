@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+	"strconv"
 
 	"github.com/WilliwadelmaWisky/DatabaseSQL/sql"
-	"github.com/WilliwadelmaWisky/DatabaseSQL/util"
 )
 
 // Main function
@@ -35,22 +34,36 @@ func main() {
 //   - database - Database
 func serverHandler(responseWriter http.ResponseWriter, request *http.Request, database *sql.Database) {
 	bytes, _ := io.ReadAll(request.Body)
+	fmt.Printf("[SQL]: %s\n", string(bytes))
+
 	tokens := sql.Tokenize(bytes)
-	values := util.Map(tokens, func(token sql.Token) string {
-		return fmt.Sprintf("'%s'", token.Value)
-	})
-
-	fmt.Printf("Request SQL: %s\n", string(bytes))
-	fmt.Printf("Tokens found: %s\n", strings.Join(values, " "))
-
 	if len(tokens) == 0 {
+		fmt.Print("No tokens received from request\n")
 		responseWriter.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	operation, _ := sql.Parse(tokens)
-	result := operation.Call(database)
+	// TOKEN DEBUGGING
+	// values := util.Map(tokens, func(token sql.Token) string {
+	// 	return fmt.Sprintf("'%s'", token.Value)
+	// })
+	// fmt.Printf("Tokens found: %s\n", strings.Join(values, " "))
 
-	responseWriter.Write(result)
+	operation, err := sql.Parse(tokens)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		responseWriter.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	result := operation.Call(database)
+	if result != nil {
+		responseWriter.Header().Add("Content-Length", strconv.Itoa(len(result)))
+		responseWriter.Header().Add("Content-Type", "application/json")
+		responseWriter.WriteHeader(http.StatusOK)
+		responseWriter.Write(result)
+		return
+	}
+
 	responseWriter.WriteHeader(http.StatusOK)
 }
