@@ -2,14 +2,6 @@ package sql
 
 import "fmt"
 
-type ColumnType int
-
-const (
-	TYPE_INVALID ColumnType = -1
-	TYPE_INT     ColumnType = 1
-	TYPE_VARCHAR ColumnType = 2
-)
-
 func (Type ColumnType) GetDefaultValue() (string, error) {
 	switch Type {
 	case TYPE_INT:

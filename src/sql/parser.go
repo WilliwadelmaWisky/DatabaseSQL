@@ -4,40 +4,6 @@ import (
 	"fmt"
 )
 
-type Variable struct {
-	Column string
-	Value  string
-}
-
-type OperationType int
-
-const (
-	CREATE OperationType = iota
-	INSERT
-	UPDATE
-	SELECT
-	DELETE
-)
-
-type EqualityOperator byte
-
-const (
-	LESS             EqualityOperator = 1
-	GREATER          EqualityOperator = 2
-	EQUAL            EqualityOperator = 4
-	LESS_OR_EQUAL    EqualityOperator = LESS | EQUAL
-	GREATER_OR_EQUAL EqualityOperator = GREATER | EQUAL
-)
-
-type Where struct {
-	Column    string
-	Condition []Condition
-}
-
-type Condition struct {
-	Operator EqualityOperator
-}
-
 type OrderDirection int
 
 const (
@@ -60,7 +26,7 @@ type ValData struct {
 	Value      string
 }
 
-func Parse(tokens []Token) (Operation, error) {
+func Parse(tokens []*Token) (Operation, error) {
 	if len(tokens) <= 0 {
 		return nil, fmt.Errorf("no operation could be created, no tokens")
 	}
@@ -73,7 +39,7 @@ func Parse(tokens []Token) (Operation, error) {
 			columnName := tokens[i].Value
 			columnNames = append(columnNames, columnName)
 
-			if tokens[i+1].Type == Comma {
+			if tokens[i+1].Type == TOKEN_COMMA {
 				continue
 			}
 
@@ -84,11 +50,16 @@ func Parse(tokens []Token) (Operation, error) {
 		tableName := ""
 		if tokens[index].Value == "FROM" {
 			tableName = tokens[index+1].Value
+			index += 2
 		}
+
+		filters, indexIncrement := parseFilters(tokens[index:])
+		index += indexIncrement
 
 		return &SelectOperation{
 			ColumnNames: columnNames,
 			TableName:   tableName,
+			Filters:     filters,
 		}, nil
 	}
 
@@ -98,14 +69,14 @@ func Parse(tokens []Token) (Operation, error) {
 
 		for i := 4; i < len(tokens); i += 3 {
 			colName := tokens[i].Value
-			colType, _ := getColumnType(tokens[i+1].Value)
+			colType, _ := GetType(tokens[i+1].Value)
 			data = append(data, ColData{Name: colName, Type: colType})
 
 			if tokens[i+2].Value == ")" {
 				break
 			}
 
-			if tokens[i+2].Type == Comma {
+			if tokens[i+2].Type == TOKEN_COMMA {
 				continue
 			}
 		}
@@ -125,7 +96,7 @@ func Parse(tokens []Token) (Operation, error) {
 			columnName := tokens[i].Value
 			data = append(data, ValData{ColumnName: columnName})
 
-			if tokens[i+1].Type == Comma {
+			if tokens[i+1].Type == TOKEN_COMMA {
 				continue
 			}
 
@@ -145,11 +116,11 @@ func Parse(tokens []Token) (Operation, error) {
 
 			valIndex++
 
-			if tokens[i+1].Type == Comma {
+			if tokens[i+1].Type == TOKEN_COMMA {
 				continue
 			}
 
-			if tokens[i+1].Type == Parenthesis {
+			if tokens[i+1].Type == TOKEN_PARENTHESIS {
 				break
 			}
 		}
@@ -163,13 +134,48 @@ func Parse(tokens []Token) (Operation, error) {
 	return nil, fmt.Errorf("no operation could be created, invalid or not supported tokens")
 }
 
-func getColumnType(typeString string) (ColumnType, error) {
-	switch typeString {
-	case "INT":
-		return TYPE_INT, nil
-	case "VARCHAR":
-		return TYPE_VARCHAR, nil
+func parseFilters(tokens []*Token) ([]*Filter, int) {
+	filters := []*Filter{}
+	if len(tokens) <= 0 || tokens[0].Value != "WHERE" {
+		return filters, 0
 	}
 
-	return TYPE_INVALID, fmt.Errorf("invalid column type [%s]", typeString)
+	index := 1
+	value1 := tokens[index].Value
+
+	index++
+	operator1 := GetOperator(tokens[index].Value)
+	if tokens[index+1].Type == TOKEN_OPERATOR {
+		operator1 = operator1 | GetOperator(tokens[index+1].Value)
+		index++
+	}
+
+	index++
+	value2 := tokens[index].Value
+
+	filters = append(filters, &Filter{
+		ColumnName:   value1,
+		Operator:     operator1,
+		CompareValue: value2,
+	})
+
+	// index++
+	// if index < len(tokens) && tokens[index].Type == TOKEN_OPERATOR {
+	// 	operator2 := stringToEqualityOperator(tokens[index].Value)
+	// 	if tokens[index+1].Type == TOKEN_OPERATOR {
+	// 		operator2 = operator2 | stringToEqualityOperator(tokens[index+1].Value)
+	// 		index++
+	// 	}
+
+	// 	index++
+	// 	value3 := tokens[index].Value
+
+	// }
+
+	index++
+	return filters, index
 }
+
+// func parseOrder() {
+
+// }

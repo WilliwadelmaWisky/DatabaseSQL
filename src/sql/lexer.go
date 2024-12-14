@@ -8,25 +8,21 @@ type Token struct {
 func GetTokenType(value string) TokenType {
 	switch value {
 	case "*":
-		return Any
+		return TOKEN_ASTERISK
 	case ",":
-		return Comma
-	case "=":
-		return Equal
-	case "<":
-		return LessThan
-	case ">":
-		return GreaterThan
+		return TOKEN_COMMA
+	case "=", "<", ">":
+		return TOKEN_OPERATOR
 	case "(", ")":
-		return Parenthesis
+		return TOKEN_PARENTHESIS
 	default:
-		return Text
+		return TOKEN_TEXT
 	}
 }
 
-func Tokenize(b []byte) []Token {
+func Tokenize(b []byte) []*Token {
 	start := 0
-	tokens := make([]Token, 0)
+	tokens := []*Token{}
 	isQuoted := false
 
 	for i := 0; i < len(b); i++ {
@@ -36,7 +32,7 @@ func Tokenize(b []byte) []Token {
 			}
 
 			value := string(b[start+1 : i])
-			token := Token{
+			token := &Token{
 				Type:  GetTokenType(value),
 				Value: value,
 			}
@@ -49,7 +45,7 @@ func Tokenize(b []byte) []Token {
 		if b[i] == '\'' {
 			if start <= i-1 {
 				value := string(b[start:i])
-				token := Token{
+				token := &Token{
 					Type:  GetTokenType(value),
 					Value: value,
 				}
@@ -64,7 +60,7 @@ func Tokenize(b []byte) []Token {
 		if IsSpecial(b[i]) {
 			if start <= i-1 {
 				value := string(b[start:i])
-				token := Token{
+				token := &Token{
 					Type:  GetTokenType(value),
 					Value: value,
 				}
@@ -73,7 +69,7 @@ func Tokenize(b []byte) []Token {
 			}
 
 			value := string(b[start : i+1])
-			token := Token{
+			token := &Token{
 				Type:  GetTokenType(value),
 				Value: value,
 			}
@@ -85,7 +81,7 @@ func Tokenize(b []byte) []Token {
 		if IsAlphaNumeric(b[i]) {
 			if i == len(b)-1 {
 				value := string(b[start : i+1])
-				token := Token{
+				token := &Token{
 					Type:  GetTokenType(value),
 					Value: value,
 				}
@@ -99,7 +95,7 @@ func Tokenize(b []byte) []Token {
 		// End of token
 		if start != i {
 			value := string(b[start:i])
-			token := Token{
+			token := &Token{
 				Type:  GetTokenType(value),
 				Value: value,
 			}
@@ -123,11 +119,9 @@ func IsSpecial(c byte) bool {
 type TokenType int
 
 const (
-	Any TokenType = iota
-	Text
-	Comma
-	Equal
-	LessThan
-	GreaterThan
-	Parenthesis
+	TOKEN_TEXT TokenType = iota
+	TOKEN_OPERATOR
+	TOKEN_COMMA
+	TOKEN_ASTERISK
+	TOKEN_PARENTHESIS
 )
