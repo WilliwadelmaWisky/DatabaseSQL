@@ -27,9 +27,15 @@ Start the program.
 go run .
 ```
 
+Communicate with the database via curl or some other tool.
+
+```
+curl -i -X POST -d "SELECT * FROM table" localhost:9000
+```
+
 ## Features
 <p align="justify">
-    The database supports all the basic CRUD operations Examples on the supported sql syntax below. If you want to use values with spaces, only single quotes are supported. Syntax allows additional spaces/newlines in the sql expressions.
+    The database supports all the basic CRUD operations Examples on the supported sql syntax below. If you want to use values with spaces, only single quotes are supported. Syntax allows additional spaces/newlines in the sql expressions and is not case sensitive.
 </p>
 
 ### Create a new Table
@@ -99,7 +105,8 @@ ORDER BY name ASC
 -- Get artists name that are age<50, also order by name ascending and if same name then order by age descending
 SELECT name FROM artists
 WHERE age < 50
-ORDER BY name ASC, age DESC
+ORDER BY name ASC
+ORDER BY age DESC
 ```
 
 > [!NOTE]
