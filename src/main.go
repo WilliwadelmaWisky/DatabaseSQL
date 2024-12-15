@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/WilliwadelmaWisky/DatabaseSQL/sql"
@@ -11,18 +12,29 @@ import (
 
 // Main function
 func main() {
-	database := sql.Database{}
+	port := 9000
+	if len(os.Args) > 1 {
+		value, err := strconv.Atoi(os.Args[1])
+		if err != nil {
+			fmt.Printf("%s\n", err.Error())
+			return
+		}
 
-	server := sql.Server{
-		Addr: "localhost:9000",
+		port = value
+	}
+
+	database := &sql.Database{}
+
+	server := &sql.Server{
+		Addr: fmt.Sprintf("localhost:%d", port),
 		Routes: []sql.Route{
 			{URI: "/", Methods: []sql.HttpMethod{sql.HTTP_POST}, Handler: func(w http.ResponseWriter, r *http.Request) {
-				serverHandler(w, r, &database)
+				serverHandler(w, r, database)
 			}},
 		},
 	}
 
-	fmt.Println("Server starting at http://localhost:9000/\nPress <CTRL+C> to terminate!")
+	fmt.Printf("Server starting at http://localhost:%d/\nPress <CTRL+C> to terminate!\n", port)
 	server.ListenAndServe()
 }
 

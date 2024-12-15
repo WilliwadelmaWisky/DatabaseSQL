@@ -21,13 +21,13 @@ cd to source directory.
 cd DatabaseSQL/src
 ```
 
-Start the program.
+Start the program. Port can be specified after dot but if defaults to 9000.
 
 ```
-go run .
+go run . [PORT]
 ```
 
-Communicate with the database via curl or some other tool.
+Communicate with the database via curl or some other tool. If you specified a port use that instead of 9000.
 
 ```
 curl -i -X POST -d "SELECT * FROM table" localhost:9000
