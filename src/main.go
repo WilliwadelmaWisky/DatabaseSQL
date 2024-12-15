@@ -50,7 +50,7 @@ func serverHandler(responseWriter http.ResponseWriter, request *http.Request, da
 
 	tokens := sql.Tokenize(bytes)
 	if len(tokens) == 0 {
-		fmt.Print("No tokens received from request\n")
+		fmt.Print("[ERROR]: No tokens received from request\n")
 		responseWriter.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -63,12 +63,18 @@ func serverHandler(responseWriter http.ResponseWriter, request *http.Request, da
 
 	operation, err := sql.Parse(tokens)
 	if err != nil {
-		fmt.Printf("%s\n", err.Error())
+		fmt.Printf("[ERROR]: %s\n", err.Error())
 		responseWriter.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	result := operation.Call(database)
+	result, err := operation.Call(database)
+	if err != nil {
+		fmt.Printf("[ERROR]: %s\n", err.Error())
+		responseWriter.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	if result != nil {
 		responseWriter.Header().Add("Content-Length", strconv.Itoa(len(result)))
 		responseWriter.Header().Add("Content-Type", "application/json")

@@ -33,7 +33,7 @@ func Parse(tokens []*Token) (Operation, error) {
 		return parseDelete(tokens, 1)
 	}
 
-	return nil, fmt.Errorf("any operation could not be created, invalid or not supported tokens")
+	return nil, fmt.Errorf("any operation could not be created, invalid or not supported operation")
 }
 
 func parseSelect(tokens []*Token, index int) (Operation, error) {
@@ -162,7 +162,65 @@ func parseInsert(tokens []*Token, index int) (Operation, error) {
 }
 
 func parseUpdate(tokens []*Token, index int) (Operation, error) {
-	return nil, nil
+	if tokens[index+1].Value != "(" {
+		return nil, fmt.Errorf("update operation could not be created, missing parenthesis")
+	}
+
+	tableName := tokens[index].Value
+	data := []ValData{}
+
+	for i := index + 2; i < len(tokens); i += 2 {
+		columnName := tokens[i].Value
+		data = append(data, ValData{ColumnName: columnName})
+
+		if tokens[i+1].Type == TOKEN_COMMA {
+			continue
+		}
+
+		if tokens[i+1].Value == ")" {
+			index = i + 2
+			break
+		}
+	}
+
+	if strings.ToUpper(tokens[index].Value) != "VALUES" || tokens[index+1].Value != "(" {
+		return nil, fmt.Errorf("update operation could not be created, missing values keyword or parenthesis")
+	}
+
+	valIndex := 0
+	for i := index + 2; i < len(tokens); i += 2 {
+		value := tokens[i].Value
+		data[valIndex].Value = value
+		valIndex++
+
+		if tokens[i+1].Type == TOKEN_COMMA {
+			continue
+		}
+
+		if tokens[i+1].Value == ")" {
+			index = i + 2
+			break
+		}
+	}
+
+	filters := []*Filter{}
+	for index < len(tokens) {
+		switch strings.ToUpper(tokens[index].Value) {
+		case "WHERE":
+			f, i := parseFilters(tokens, index+1)
+			filters = append(filters, f...)
+			index = i
+			continue
+		}
+
+		return nil, fmt.Errorf("select operation could not be created, invalid syntax after table name")
+	}
+
+	return &UpdateOperation{
+		TableName: tableName,
+		Data:      data,
+		Filters:   filters,
+	}, nil
 }
 
 func parseDelete(tokens []*Token, index int) (Operation, error) {

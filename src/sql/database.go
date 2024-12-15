@@ -10,12 +10,9 @@ type Database struct {
 }
 
 func (database *Database) Get(tableName string) (*Table, error) {
-	index := slices.IndexFunc(database.Tables, func(t *Table) bool {
-		return t.Name == tableName
-	})
-
+	index := slices.IndexFunc(database.Tables, func(t *Table) bool { return t.Name == tableName })
 	if index == -1 {
-		return nil, fmt.Errorf("table [%s] not found", tableName)
+		return nil, fmt.Errorf("table not found: %s", tableName)
 	}
 
 	return database.Tables[index], nil
