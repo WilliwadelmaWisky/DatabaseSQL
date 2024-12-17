@@ -14,20 +14,20 @@ import (
 
 // Main function
 func main() {
-	port := 9000
+	url := "default"
 	if len(os.Args) > 1 {
-		value, err := strconv.Atoi(os.Args[1])
+		url = os.Args[1]
+	}
+
+	port := 9000
+	if len(os.Args) > 2 {
+		value, err := strconv.Atoi(os.Args[2])
 		if err != nil {
 			fmt.Printf("%s\n", err.Error())
 			return
 		}
 
 		port = value
-	}
-
-	url := "default"
-	if len(os.Args) > 2 {
-		url = os.Args[2]
 	}
 
 	homeDir, _ := os.UserHomeDir()
@@ -48,12 +48,7 @@ func main() {
 	server.ListenAndServe()
 }
 
-// h
-//
-// # Arguments
-//   - responseWriter - Hello
-//   - request - Request
-//   - database - Database
+// Http_Server request handler
 func serverHandler(responseWriter http.ResponseWriter, request *http.Request, database *sql.Database) {
 	bytes, _ := io.ReadAll(request.Body)
 	fmt.Printf("[SQL]: %s\n", string(bytes))

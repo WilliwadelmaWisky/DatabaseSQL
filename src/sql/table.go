@@ -5,11 +5,13 @@ import (
 	"slices"
 )
 
+// Represents a single table in the database
 type Table struct {
 	Name    string    `json:"table"`
 	Columns []*Column `json:"columns"`
 }
 
+// An object to return by get method
 type TableData struct {
 	ColumnNames []string   `json:"column_names"`
 	Rows        [][]string `json:"rows"`
@@ -26,6 +28,7 @@ type ColData struct {
 	ColType ColumnType
 }
 
+// Insert data to a table
 func (table *Table) Insert(data []RowData) error {
 	for _, col := range table.Columns {
 		dataIndex := slices.IndexFunc(data, func(rowData RowData) bool { return rowData.ColName == col.Name })
@@ -42,6 +45,9 @@ func (table *Table) Insert(data []RowData) error {
 	return nil
 }
 
+// Get data from a table
+//   - columnNames define which columns to include, * get all.
+//   - filters define which rows to include
 func (table *Table) Get(columnNames []string, filters []*Filter) (*TableData, error) {
 	rowCount := len(table.Columns[0].Values)
 	columns := table.getColumns(columnNames)
@@ -69,6 +75,7 @@ func (table *Table) Get(columnNames []string, filters []*Filter) (*TableData, er
 	return data, nil
 }
 
+// Update values of the table
 func (table *Table) Update(data []RowData, filters []*Filter) error {
 	colCount := len(table.Columns)
 	rowCount := len(table.Columns[0].Values)
@@ -92,6 +99,7 @@ func (table *Table) Update(data []RowData, filters []*Filter) error {
 	return nil
 }
 
+// Delete values from the table
 func (table *Table) Delete(filters []*Filter) error {
 	colCount := len(table.Columns)
 	rowCount := len(table.Columns[0].Values)
@@ -110,6 +118,7 @@ func (table *Table) Delete(filters []*Filter) error {
 	return nil
 }
 
+// Get a column by name
 func (table *Table) getColumnByName(colName string) (*Column, error) {
 	index := slices.IndexFunc(table.Columns, func(col *Column) bool { return col.Name == colName })
 	if index == -1 {
@@ -119,6 +128,7 @@ func (table *Table) getColumnByName(colName string) (*Column, error) {
 	return table.Columns[index], nil
 }
 
+// Get all columns by name array, if name array contains only a single asterisk all columns are returned
 func (table *Table) getColumns(columnNames []string) []*Column {
 	if len(columnNames) == 1 && columnNames[0] == "*" {
 		return table.Columns // SELECT ALL
@@ -137,6 +147,7 @@ func (table *Table) getColumns(columnNames []string) []*Column {
 	return columns
 }
 
+// Check if row is included in the filters
 func (table *Table) isRowIncludedInFilters(rowIndex int, filters []*Filter) bool {
 	for _, col := range table.Columns {
 		value := col.Values[rowIndex]

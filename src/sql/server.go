@@ -6,28 +6,37 @@ import (
 	"strings"
 )
 
+// Represents an http server
 type Server struct {
 	Addr   string
 	Routes []Route
 }
 
+// Represents a single route on the server
 type Route struct {
 	URI     string
 	Methods []HttpMethod
 	Handler http.HandlerFunc
 }
 
-// Http method
+// Enum to represent an http method, values are prefixed with HTTP.
+// Enum is flagged so many methods can be combined by bitwise or |
 type HttpMethod int
 
 const (
-	HTTP_GET    HttpMethod = 1
-	HTTP_POST   HttpMethod = 2
-	HTTP_PUT    HttpMethod = 4
+	// Represents an http get request
+	HTTP_GET HttpMethod = 1
+	// Represents an http post request
+	HTTP_POST HttpMethod = 2
+	// Represents an http put request
+	HTTP_PUT HttpMethod = 4
+	// Represents an http delete request
 	HTTP_DELETE HttpMethod = 8
-	HTTP_ALL    HttpMethod = HTTP_GET | HTTP_POST | HTTP_PUT | HTTP_DELETE
+	// Represents any http request
+	HTTP_ALL HttpMethod = HTTP_GET | HTTP_POST | HTTP_PUT | HTTP_DELETE
 )
 
+// Starts a server
 func (s *Server) ListenAndServe() {
 	for _, route := range s.Routes {
 		http.HandleFunc(route.URI, func(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +53,8 @@ func (s *Server) ListenAndServe() {
 	http.ListenAndServe(s.Addr, nil)
 }
 
+// Get an http method from a string.
+// Empty string is considered a GET request
 func getMethodFromString(method string) (HttpMethod, error) {
 	s := strings.ToUpper(method)
 	switch {
@@ -60,6 +71,7 @@ func getMethodFromString(method string) (HttpMethod, error) {
 	return -1, fmt.Errorf("invalid method as input: %s", method)
 }
 
+// Calculates a flag value of http method array
 func GetFlag(methods []HttpMethod) int {
 	value := 0
 	for _, method := range methods {
@@ -69,6 +81,7 @@ func GetFlag(methods []HttpMethod) int {
 	return value
 }
 
+// Check if method is contained in the flag
 func containsMethod(methods []HttpMethod, method string) bool {
 	m, err := getMethodFromString(method)
 	if err != nil {

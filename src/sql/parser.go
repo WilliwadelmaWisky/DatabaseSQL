@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Parse tokens to sql expression
 func Parse(tokens []*Token) (Operation, error) {
 	if len(tokens) <= 0 {
 		return nil, fmt.Errorf("any operation could not be created, no tokens")
@@ -26,6 +27,7 @@ func Parse(tokens []*Token) (Operation, error) {
 	return nil, fmt.Errorf("any operation could not be created, invalid or not supported operation")
 }
 
+// Parse a select operation
 func parseSelect(tokens []*Token, index int) (Operation, error) {
 	columnNames := []string{}
 
@@ -53,12 +55,12 @@ func parseSelect(tokens []*Token, index int) (Operation, error) {
 	for index < len(tokens) {
 		switch strings.ToUpper(tokens[index].Value) {
 		case "WHERE":
-			f, i := parseFilters(tokens, index+1)
+			f, i := parseFilter(tokens, index+1)
 			filters = append(filters, f...)
 			index = i
 			continue
 		case "ORDER":
-			s, i := parseOrder(tokens, index+1)
+			s, i := parseSorter(tokens, index+1)
 			sorters = append(sorters, s)
 			index = i
 			continue
@@ -75,6 +77,7 @@ func parseSelect(tokens []*Token, index int) (Operation, error) {
 	}, nil
 }
 
+// Parse a create operation
 func parseCreate(tokens []*Token, index int) (Operation, error) {
 	if strings.ToUpper(tokens[index].Value) != "TABLE" || tokens[index+2].Value != "(" {
 		return nil, fmt.Errorf("create operation could not be created, trying to create something other than a table or missing parentheses")
@@ -103,6 +106,7 @@ func parseCreate(tokens []*Token, index int) (Operation, error) {
 	}, nil
 }
 
+// Parse an insert operation
 func parseInsert(tokens []*Token, index int) (Operation, error) {
 	if strings.ToUpper(tokens[index].Value) != "INTO" || tokens[index+2].Value != "(" {
 		return nil, fmt.Errorf("insert operation could not be created, missing into keyword or parentheses")
@@ -151,6 +155,7 @@ func parseInsert(tokens []*Token, index int) (Operation, error) {
 	}, nil
 }
 
+// Parse an update operation
 func parseUpdate(tokens []*Token, index int) (Operation, error) {
 	if tokens[index+1].Value != "(" {
 		return nil, fmt.Errorf("update operation could not be created, missing parenthesis")
@@ -197,7 +202,7 @@ func parseUpdate(tokens []*Token, index int) (Operation, error) {
 	for index < len(tokens) {
 		switch strings.ToUpper(tokens[index].Value) {
 		case "WHERE":
-			f, i := parseFilters(tokens, index+1)
+			f, i := parseFilter(tokens, index+1)
 			filters = append(filters, f...)
 			index = i
 			continue
@@ -213,6 +218,7 @@ func parseUpdate(tokens []*Token, index int) (Operation, error) {
 	}, nil
 }
 
+// Parse a delete operation
 func parseDelete(tokens []*Token, index int) (Operation, error) {
 	if strings.ToUpper(tokens[index].Value) != "FROM" {
 		return nil, fmt.Errorf("delete operation could not be created, missing from keyword")
@@ -225,7 +231,7 @@ func parseDelete(tokens []*Token, index int) (Operation, error) {
 	for index < len(tokens) {
 		switch strings.ToUpper(tokens[index].Value) {
 		case "WHERE":
-			f, i := parseFilters(tokens, index+1)
+			f, i := parseFilter(tokens, index+1)
 			filters = append(filters, f...)
 			index = i
 			continue
@@ -240,7 +246,9 @@ func parseDelete(tokens []*Token, index int) (Operation, error) {
 	}, nil
 }
 
-func parseFilters(tokens []*Token, index int) ([]*Filter, int) {
+// Parse a where expression.
+// for example 0 < x < 1 returns two filters x > 0 and x < 1
+func parseFilter(tokens []*Token, index int) ([]*Filter, int) {
 	filters := []*Filter{}
 	value1 := tokens[index].Value
 
@@ -277,6 +285,7 @@ func parseFilters(tokens []*Token, index int) ([]*Filter, int) {
 	return filters, index
 }
 
-func parseOrder(tokens []*Token, index int) (*Sorter, int) {
+// Parse order by expression
+func parseSorter(tokens []*Token, index int) (*Sorter, int) {
 	return &Sorter{}, 0
 }

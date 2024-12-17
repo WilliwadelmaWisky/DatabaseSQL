@@ -21,17 +21,24 @@ cd to source directory.
 cd DatabaseSQL/src
 ```
 
-Start the program. Port can be specified after dot but if defaults to 9000.
+Start the program. 
 
 ```
-go run . [PORT]
+go run . [URI] [PORT]
 ```
 
-Communicate with the database via curl or some other tool. If you specified a port use that instead of 9000.
+> [!NOTE]
+> URI can be specified (defaults to **default**). URI defines to location of the database files on the disk, nested directories should be separeated by '/' on all operating systems.
+> Port can be specified (defaults to **9000**). Port is checked from the second argument so URI must be specified before.
+
+Communicate with the database via curl or some other tool.
 
 ```
 curl -i -X POST -d "SELECT * FROM table" localhost:9000
 ```
+
+> [!NOTE]
+> If you specified a port use that instead of *9000*.
 
 ## Features
 <p align="justify">
@@ -111,6 +118,21 @@ ORDER BY age DESC
 
 > [!NOTE]
 > Select supports only selecting columns from a single table, however many columns can be requested separated with comma. Where supports only one condition, multiple where statements can however be combined. But testing value in range is possible, for example `0 <= x <= 1`. 
+
+For the first select expression returned data is in the following format.
+
+```json
+{
+    "column_names": ["id", "name", "age"],
+    "rows": [
+        ["1", "Artist 1", "50"],
+        ["2", "Artist 2", "25"],
+        ["3", "Artist 3", "45"],
+        ["4", "Artist 4", "0"],
+    ],
+    "row_count": 4
+}
+```
 
 ### Update data in a table
 

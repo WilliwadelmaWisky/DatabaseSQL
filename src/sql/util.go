@@ -1,11 +1,6 @@
 package sql
 
-//
-//
-// # Arguments
-//  - in
-//  - proc
-//  - returns
+// Contruct a new array by proc
 func Map[TIn, TOut any](in []TIn, proc func(TIn) TOut) []TOut {
 	out := make([]TOut, len(in))
 	for i, v := range in {
@@ -16,11 +11,6 @@ func Map[TIn, TOut any](in []TIn, proc func(TIn) TOut) []TOut {
 }
 
 //
-//
-// # Arguments
-//  - in
-//  - match
-//  - returns
 // func Filter[T any](in []T, match func(T) bool) []T {
 // 	out := make([]T, 0)
 // 	for _, v := range in {
@@ -31,19 +21,3 @@ func Map[TIn, TOut any](in []TIn, proc func(TIn) TOut) []TOut {
 
 // 	return out
 // }
-
-//
-//
-// # Arguments
-//  - in
-//  - value
-//  - returns
-func Contains[T comparable](in []T, value T) bool {
-	for _, v := range in {
-		if v == value {
-			return true
-		}
-	}
-
-	return false
-}

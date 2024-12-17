@@ -5,11 +5,14 @@ import (
 	"slices"
 )
 
+// Represents a single databse
 type Database struct {
 	rootPath string
 	tables   []*Table
 }
 
+// Create a new database.
+//   - rootPath defines the location of the saved files
 func NewDatabase(rootPath string, tables ...*Table) *Database {
 	return &Database{
 		rootPath: rootPath,
@@ -17,6 +20,7 @@ func NewDatabase(rootPath string, tables ...*Table) *Database {
 	}
 }
 
+// Get a table from the database by name
 func (database *Database) Get(tableName string) (*Table, error) {
 	index := slices.IndexFunc(database.tables, func(t *Table) bool { return t.Name == tableName })
 	if index == -1 {
@@ -26,6 +30,7 @@ func (database *Database) Get(tableName string) (*Table, error) {
 	return database.tables[index], nil
 }
 
+// Create a new empty table in the database
 func (database *Database) Create(tableName string, data []ColData) {
 	columns := []*Column{}
 	for _, colData := range data {
@@ -42,10 +47,12 @@ func (database *Database) Create(tableName string, data []ColData) {
 	})
 }
 
+// Write database to disk
 func (database *Database) Save() {
 
 }
 
+// Read database from disk
 func (database *Database) Load() {
 	fmt.Printf("Path: %s\n", database.rootPath)
 }
