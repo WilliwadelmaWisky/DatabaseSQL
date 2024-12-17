@@ -2,6 +2,12 @@ package sql
 
 import "fmt"
 
+type Column struct {
+	Name   string     `json:"column"`
+	Type   ColumnType `json:"type"`
+	Values []string   `json:"values"`
+}
+
 func (Type ColumnType) GetDefaultValue() (string, error) {
 	switch Type {
 	case TYPE_INT:
@@ -22,10 +28,4 @@ func (Type ColumnType) ToString() string {
 	}
 
 	return "NULL"
-}
-
-type Column struct {
-	Name   string     `json:"column"`
-	Type   ColumnType `json:"type"`
-	Values []string   `json:"values"`
 }

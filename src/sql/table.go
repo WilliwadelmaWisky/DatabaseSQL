@@ -26,21 +26,23 @@ type ColData struct {
 	ColType ColumnType
 }
 
-func (table *Table) Insert(data []RowData) {
-	for _, column := range table.Columns {
-		valIndex := slices.IndexFunc(data, func(valData RowData) bool { return valData.ColName == column.Name })
-		if valIndex != -1 {
-			value := data[valIndex].Value
-			column.Values = append(column.Values, value)
+func (table *Table) Insert(data []RowData) error {
+	for _, col := range table.Columns {
+		dataIndex := slices.IndexFunc(data, func(rowData RowData) bool { return rowData.ColName == col.Name })
+		if dataIndex != -1 {
+			value := data[dataIndex].Value
+			col.Values = append(col.Values, value)
 			continue
 		}
 
-		value, _ := column.Type.GetDefaultValue()
-		column.Values = append(column.Values, value)
+		value, _ := col.Type.GetDefaultValue()
+		col.Values = append(col.Values, value)
 	}
+
+	return nil
 }
 
-func (table *Table) Get(columnNames []string, filters []*Filter) *TableData {
+func (table *Table) Get(columnNames []string, filters []*Filter) (*TableData, error) {
 	rowCount := len(table.Columns[0].Values)
 	columns := table.getColumns(columnNames)
 	data := &TableData{
@@ -64,10 +66,10 @@ func (table *Table) Get(columnNames []string, filters []*Filter) *TableData {
 		data.RowCount++
 	}
 
-	return data
+	return data, nil
 }
 
-func (table *Table) Update(data []RowData, filters []*Filter) {
+func (table *Table) Update(data []RowData, filters []*Filter) error {
 	colCount := len(table.Columns)
 	rowCount := len(table.Columns[0].Values)
 
@@ -86,9 +88,11 @@ func (table *Table) Update(data []RowData, filters []*Filter) {
 			}
 		}
 	}
+
+	return nil
 }
 
-func (table *Table) Delete(filters []*Filter) {
+func (table *Table) Delete(filters []*Filter) error {
 	colCount := len(table.Columns)
 	rowCount := len(table.Columns[0].Values)
 
@@ -102,6 +106,8 @@ func (table *Table) Delete(filters []*Filter) {
 			col.Values = slices.Delete(col.Values, rowIndex, rowIndex+1)
 		}
 	}
+
+	return nil
 }
 
 func (table *Table) getColumnByName(colName string) (*Column, error) {

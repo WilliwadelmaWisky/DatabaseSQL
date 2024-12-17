@@ -10,9 +10,10 @@ type Database struct {
 	tables   []*Table
 }
 
-func NewDatabase(path string) *Database {
+func NewDatabase(rootPath string, tables ...*Table) *Database {
 	return &Database{
-		rootPath: path,
+		rootPath: rootPath,
+		tables:   tables,
 	}
 }
 
@@ -29,13 +30,16 @@ func (database *Database) Create(tableName string, data []ColData) {
 	columns := []*Column{}
 	for _, colData := range data {
 		columns = append(columns, &Column{
-			Name: colData.ColName,
-			Type: colData.ColType,
+			Name:   colData.ColName,
+			Type:   colData.ColType,
+			Values: []string{},
 		})
 	}
 
-	table := &Table{Name: tableName, Columns: columns}
-	database.tables = append(database.tables, table)
+	database.tables = append(database.tables, &Table{
+		Name:    tableName,
+		Columns: columns,
+	})
 }
 
 func (database *Database) Save() {

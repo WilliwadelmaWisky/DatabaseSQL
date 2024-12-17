@@ -29,8 +29,8 @@ func (operation *InsertOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	table.Insert(operation.Data)
-	return nil, nil
+	err = table.Insert(operation.Data)
+	return nil, err
 }
 
 type SelectOperation struct {
@@ -46,7 +46,11 @@ func (operation *SelectOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	data := table.Get(operation.ColumnNames, operation.Filters)
+	data, err := table.Get(operation.ColumnNames, operation.Filters)
+	if err != nil {
+		return nil, err
+	}
+
 	bytes, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -67,8 +71,8 @@ func (operation *UpdateOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	table.Update(operation.Data, operation.Filters)
-	return nil, nil
+	err = table.Update(operation.Data, operation.Filters)
+	return nil, err
 }
 
 type DeleteOperation struct {
@@ -82,6 +86,6 @@ func (operation *DeleteOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	table.Delete(operation.Filters)
-	return nil, nil
+	err = table.Delete(operation.Filters)
+	return nil, err
 }
