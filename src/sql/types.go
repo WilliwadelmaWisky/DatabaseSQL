@@ -1,6 +1,9 @@
 package sql
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type ColumnType int
 
@@ -10,12 +13,12 @@ const (
 )
 
 func GetType(s string) (ColumnType, error) {
-	switch s {
+	switch strings.ToUpper(s) {
 	case "INT":
 		return TYPE_INT, nil
 	case "VARCHAR":
 		return TYPE_VARCHAR, nil
 	}
 
-	return -1, fmt.Errorf("invalid column type [%s]", s)
+	return -1, fmt.Errorf("invalid column type: %s", s)
 }

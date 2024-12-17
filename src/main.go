@@ -5,7 +5,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/WilliwadelmaWisky/DatabaseSQL/sql"
 )
@@ -23,7 +25,15 @@ func main() {
 		port = value
 	}
 
-	database := &sql.Database{}
+	url := "default"
+	if len(os.Args) > 2 {
+		url = os.Args[2]
+	}
+
+	homeDir, _ := os.UserHomeDir()
+	path := filepath.Join(append([]string{homeDir, ".WilliwadelmaWisky", "DatabaseSQL"}, strings.Split(url, "/")...)...)
+	database := sql.NewDatabase(path)
+	database.Load()
 
 	server := &sql.Server{
 		Addr: fmt.Sprintf("localhost:%d", port),

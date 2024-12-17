@@ -5,16 +5,6 @@ import (
 	"strings"
 )
 
-type ColData struct {
-	Name string
-	Type ColumnType
-}
-
-type ValData struct {
-	ColumnName string
-	Value      string
-}
-
 func Parse(tokens []*Token) (Operation, error) {
 	if len(tokens) <= 0 {
 		return nil, fmt.Errorf("any operation could not be created, no tokens")
@@ -96,7 +86,7 @@ func parseCreate(tokens []*Token, index int) (Operation, error) {
 	for i := index + 3; i < len(tokens); i += 3 {
 		colName := tokens[i].Value
 		colType, _ := GetType(tokens[i+1].Value)
-		data = append(data, ColData{Name: colName, Type: colType})
+		data = append(data, ColData{ColName: colName, ColType: colType})
 
 		if tokens[i+2].Type == TOKEN_COMMA {
 			continue
@@ -119,11 +109,11 @@ func parseInsert(tokens []*Token, index int) (Operation, error) {
 	}
 
 	tableName := tokens[index+1].Value
-	data := []ValData{}
+	data := []RowData{}
 
 	for i := index + 3; i < len(tokens); i += 2 {
 		columnName := tokens[i].Value
-		data = append(data, ValData{ColumnName: columnName})
+		data = append(data, RowData{ColName: columnName})
 
 		if tokens[i+1].Type == TOKEN_COMMA {
 			continue
@@ -167,11 +157,11 @@ func parseUpdate(tokens []*Token, index int) (Operation, error) {
 	}
 
 	tableName := tokens[index].Value
-	data := []ValData{}
+	data := []RowData{}
 
 	for i := index + 2; i < len(tokens); i += 2 {
 		columnName := tokens[i].Value
-		data = append(data, ValData{ColumnName: columnName})
+		data = append(data, RowData{ColName: columnName})
 
 		if tokens[i+1].Type == TOKEN_COMMA {
 			continue

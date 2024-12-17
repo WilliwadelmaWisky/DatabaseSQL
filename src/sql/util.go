@@ -1,4 +1,4 @@
-package util
+package sql
 
 //
 //
@@ -21,16 +21,16 @@ func Map[TIn, TOut any](in []TIn, proc func(TIn) TOut) []TOut {
 //  - in
 //  - match
 //  - returns
-func Filter[T any](in []T, match func(T) bool) []T {
-	out := make([]T, 0)
-	for _, v := range in {
-		if match(v) {
-			out = append(out, v)
-		}
-	}
+// func Filter[T any](in []T, match func(T) bool) []T {
+// 	out := make([]T, 0)
+// 	for _, v := range in {
+// 		if match(v) {
+// 			out = append(out, v)
+// 		}
+// 	}
 
-	return out
-}
+// 	return out
+// }
 
 //
 //

@@ -20,7 +20,7 @@ func (operation *CreateOperation) Call(database *Database) ([]byte, error) {
 
 type InsertOperation struct {
 	TableName string
-	Data      []ValData
+	Data      []RowData
 }
 
 func (operation *InsertOperation) Call(database *Database) ([]byte, error) {
@@ -46,8 +46,8 @@ func (operation *SelectOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	objects := table.Get(operation.ColumnNames, operation.Filters)
-	bytes, err := json.Marshal(objects)
+	data := table.Get(operation.ColumnNames, operation.Filters)
+	bytes, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (operation *SelectOperation) Call(database *Database) ([]byte, error) {
 
 type UpdateOperation struct {
 	TableName string
-	Data      []ValData
+	Data      []RowData
 	Filters   []*Filter
 }
 
