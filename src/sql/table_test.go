@@ -14,7 +14,7 @@ func TestTableInsert(t *testing.T) {
 
 func TestTableGet(t *testing.T) {
 	table := &Table{Columns: []*Column{{Name: "col1", Type: TYPE_INT, Values: []string{"1", "2", "3"}}}}
-	_, err := table.Get([]string{"col1"}, []*Filter{})
+	_, err := table.Get([]string{"col1"}, []*Filter{}, []*Sorter{})
 	if err != nil {
 		t.Fatal("get returned an error but should not have")
 	}

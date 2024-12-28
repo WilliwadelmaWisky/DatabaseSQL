@@ -18,6 +18,7 @@ type CreateOperation struct {
 // Create operation execute method, creates a new table with table_name in the database with the data in the operation
 func (operation *CreateOperation) Call(database *Database) ([]byte, error) {
 	database.Create(operation.TableName, operation.Data)
+	database.Save()
 	return nil, nil
 }
 
@@ -54,7 +55,7 @@ func (operation *SelectOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	data, err := table.Get(operation.ColumnNames, operation.Filters)
+	data, err := table.Get(operation.ColumnNames, operation.Filters, operation.Sorters)
 	if err != nil {
 		return nil, err
 	}

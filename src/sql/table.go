@@ -27,6 +27,11 @@ type ColData struct {
 	ColType ColumnType
 }
 
+type SortData struct {
+	Index int
+	Row   []string
+}
+
 // Insert data to a table
 func (table *Table) Insert(data []RowData) error {
 	for _, col := range table.Columns {
@@ -47,9 +52,11 @@ func (table *Table) Insert(data []RowData) error {
 // Get data from a table
 //   - columnNames define which columns to include, * get all.
 //   - filters define which rows to include
-func (table *Table) Get(columnNames []string, filters []*Filter) (*TableData, error) {
+//   - sorters defines the order of the rows
+func (table *Table) Get(columnNames []string, filters []*Filter, sorters []*Sorter) (*TableData, error) {
 	rowCount := len(table.Columns[0].Values)
 	columns := table.getColumns(columnNames)
+	sortData := []*SortData{}
 	data := &TableData{
 		Columns: Map(columns, func(col *Column) string { return col.Name }),
 		Data:    [][]string{},
@@ -60,15 +67,17 @@ func (table *Table) Get(columnNames []string, filters []*Filter) (*TableData, er
 			continue
 		}
 
-		obj := make([]string, len(columns))
+		row := make([]string, len(columns))
 		for colIndex, col := range columns {
 			value := col.Values[rowIndex]
-			obj[colIndex] = value
+			row[colIndex] = value
 		}
 
-		data.Data = append(data.Data, obj)
+		sortData = append(sortData, &SortData{Index: rowIndex, Row: row})
 	}
 
+	table.sort(sortData, sorters)
+	data.Data = Map(sortData, func(data *SortData) []string { return data.Row })
 	return data, nil
 }
 
@@ -155,4 +164,24 @@ func (table *Table) isRowIncludedInFilters(rowIndex int, filters []*Filter) bool
 	}
 
 	return true
+}
+
+func (table *Table) sort(data []*SortData, sorters []*Sorter) {
+	if len(sorters) <= 0 {
+		return
+	}
+
+	slices.SortFunc(data, func(a *SortData, b *SortData) int {
+		for _, sorter := range sorters {
+			colIndex := slices.IndexFunc(table.Columns, func(col *Column) bool { return col.Name == sorter.ColumnName })
+			col := table.Columns[colIndex]
+
+			diff := Compare(col.Type, col.Values[a.Index], col.Values[b.Index])
+			if diff != 0 {
+				return diff * int(sorter.Direction)
+			}
+		}
+
+		return 0
+	})
 }

@@ -69,7 +69,7 @@ func sqlRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Dat
 	}
 
 	// TOKEN DEBUGGING
-	// values := util.Map(tokens, func(token sql.Token) string {
+	// values := sql.Map(tokens, func(token *sql.Token) string {
 	// 	return fmt.Sprintf("'%s'", token.Value)
 	// })
 	// fmt.Printf("Tokens found: %s\n", strings.Join(values, " "))

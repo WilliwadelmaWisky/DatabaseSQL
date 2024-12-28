@@ -60,7 +60,12 @@ func parseSelect(tokens []*Token, index int) (Operation, error) {
 			index = i
 			continue
 		case "ORDER":
-			s, i := parseSorter(tokens, index+1)
+			s, i, err := parseSorter(tokens, index+1)
+
+			if err != nil {
+				return nil, err
+			}
+
 			sorters = append(sorters, s)
 			index = i
 			continue
@@ -208,7 +213,7 @@ func parseUpdate(tokens []*Token, index int) (Operation, error) {
 			continue
 		}
 
-		return nil, fmt.Errorf("select operation could not be created, invalid syntax after table name")
+		return nil, fmt.Errorf("update operation could not be created, invalid syntax after table name")
 	}
 
 	return &UpdateOperation{
@@ -237,7 +242,7 @@ func parseDelete(tokens []*Token, index int) (Operation, error) {
 			continue
 		}
 
-		return nil, fmt.Errorf("select operation could not be created, invalid syntax after table name")
+		return nil, fmt.Errorf("delete operation could not be created, invalid syntax after table name")
 	}
 
 	return &DeleteOperation{
@@ -253,14 +258,38 @@ func parseFilter(tokens []*Token, index int) ([]*Filter, int) {
 	value1 := tokens[index].Value
 
 	index++
-	operator1 := GetOperator(tokens[index].Value)
+	operator1 := GetEqualityOperator(tokens[index].Value)
 	if tokens[index+1].Type == TOKEN_OPERATOR {
-		operator1 = operator1 | GetOperator(tokens[index+1].Value)
+		operator1 = operator1 | GetEqualityOperator(tokens[index+1].Value)
 		index++
 	}
 
 	index++
 	value2 := tokens[index].Value
+
+	index++
+	if index < len(tokens) && tokens[index].Type == TOKEN_OPERATOR {
+		operator2 := GetEqualityOperator(tokens[index].Value)
+		if tokens[index+1].Type == TOKEN_OPERATOR {
+			operator2 = operator2 | GetEqualityOperator(tokens[index+1].Value)
+			index++
+		}
+
+		index++
+		value3 := tokens[index].Value
+
+		filters = append(filters, &Filter{
+			ColumnName:   value2,
+			Operator:     operator1.Inverse(),
+			CompareValue: value1,
+		}, &Filter{
+			ColumnName:   value2,
+			Operator:     operator2,
+			CompareValue: value3,
+		})
+
+		return filters, index + 1
+	}
 
 	filters = append(filters, &Filter{
 		ColumnName:   value1,
@@ -268,24 +297,23 @@ func parseFilter(tokens []*Token, index int) ([]*Filter, int) {
 		CompareValue: value2,
 	})
 
-	// index++
-	// if index < len(tokens) && tokens[index].Type == TOKEN_OPERATOR {
-	// 	operator2 := stringToEqualityOperator(tokens[index].Value)
-	// 	if tokens[index+1].Type == TOKEN_OPERATOR {
-	// 		operator2 = operator2 | stringToEqualityOperator(tokens[index+1].Value)
-	// 		index++
-	// 	}
-
-	// 	index++
-	// 	value3 := tokens[index].Value
-
-	// }
-
-	index++
-	return filters, index
+	return filters, index + 1
 }
 
 // Parse order by expression
-func parseSorter(tokens []*Token, index int) (*Sorter, int) {
-	return &Sorter{}, 0
+func parseSorter(tokens []*Token, index int) (*Sorter, int, error) {
+	if strings.ToUpper(tokens[index].Value) != "BY" {
+		return nil, -1, fmt.Errorf("order could not be created, missing by keyword")
+	}
+
+	columnName := tokens[index+1].Value
+	direction, err := GetSortDirection(tokens[index+2].Value)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	return &Sorter{
+		ColumnName: columnName,
+		Direction:  direction,
+	}, index + 3, nil
 }
