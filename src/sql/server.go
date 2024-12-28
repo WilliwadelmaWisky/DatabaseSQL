@@ -14,9 +14,9 @@ type Server struct {
 
 // Represents a single route on the server
 type Route struct {
-	URI     string
-	Methods []HttpMethod
-	Handler http.HandlerFunc
+	URI        string
+	MethodFlag HttpMethod
+	Handler    http.HandlerFunc
 }
 
 // Enum to represent an http method, values are prefixed with HTTP.
@@ -40,7 +40,7 @@ const (
 func (s *Server) ListenAndServe() {
 	for _, route := range s.Routes {
 		http.HandleFunc(route.URI, func(w http.ResponseWriter, r *http.Request) {
-			if r.RequestURI != route.URI || !containsMethod(route.Methods, r.Method) {
+			if r.RequestURI != route.URI || !route.IsAllowedMethodString(r.Method) {
 				fmt.Printf("[SERVER] Request failed at %s, method: %s\n", r.RequestURI, r.Method)
 				w.WriteHeader(http.StatusBadRequest)
 				return
@@ -53,9 +53,25 @@ func (s *Server) ListenAndServe() {
 	http.ListenAndServe(s.Addr, nil)
 }
 
-// Get an http method from a string.
-// Empty string is considered a GET request
-func getMethodFromString(method string) (HttpMethod, error) {
+// Check if route allows http request of a certain method
+func (route *Route) IsAllowedMethod(method HttpMethod) bool {
+	return route.MethodFlag|method == route.MethodFlag
+}
+
+// Check if route allows http requests of a certain method string (not casesensitive).
+// Empty string is interpreted as a GET request
+func (route *Route) IsAllowedMethodString(method string) bool {
+	m, err := GetMethod(method)
+	if err != nil {
+		return false
+	}
+
+	return route.IsAllowedMethod(m)
+}
+
+// Get an http method from a string (not casesensitive).
+// Empty string is interpreted as a GET request
+func GetMethod(method string) (HttpMethod, error) {
 	s := strings.ToUpper(method)
 	switch {
 	case s == "" || s == "GET":
@@ -69,25 +85,4 @@ func getMethodFromString(method string) (HttpMethod, error) {
 	}
 
 	return -1, fmt.Errorf("invalid method as input: %s", method)
-}
-
-// Calculates a flag value of http method array
-func GetFlag(methods []HttpMethod) int {
-	value := 0
-	for _, method := range methods {
-		value = value | int(method)
-	}
-
-	return value
-}
-
-// Check if method is contained in the flag
-func containsMethod(methods []HttpMethod, method string) bool {
-	m, err := getMethodFromString(method)
-	if err != nil {
-		return false
-	}
-
-	flag := GetFlag(methods)
-	return flag|int(m) == flag
 }

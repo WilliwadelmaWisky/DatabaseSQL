@@ -38,9 +38,16 @@ func main() {
 	server := &sql.Server{
 		Addr: fmt.Sprintf("localhost:%d", port),
 		Routes: []sql.Route{
-			{URI: "/", Methods: []sql.HttpMethod{sql.HTTP_POST}, Handler: func(w http.ResponseWriter, r *http.Request) {
-				serverHandler(w, r, database)
-			}},
+			{
+				URI:        "/",
+				MethodFlag: sql.HTTP_POST,
+				Handler:    func(w http.ResponseWriter, r *http.Request) { sqlRequestHandler(w, r, database) },
+			},
+			{
+				URI:        "/information_schema",
+				MethodFlag: sql.HTTP_GET,
+				Handler:    func(w http.ResponseWriter, r *http.Request) { informationSchemaRequestHandler(w, r, database) },
+			},
 		},
 	}
 
@@ -48,8 +55,8 @@ func main() {
 	server.ListenAndServe()
 }
 
-// Http_Server request handler
-func serverHandler(responseWriter http.ResponseWriter, request *http.Request, database *sql.Database) {
+// HttpServer request handler for sql requests
+func sqlRequestHandler(responseWriter http.ResponseWriter, request *http.Request, database *sql.Database) {
 	bytes, _ := io.ReadAll(request.Body)
 	fmt.Printf("[SQL]: %s\n", string(bytes))
 
@@ -89,4 +96,9 @@ func serverHandler(responseWriter http.ResponseWriter, request *http.Request, da
 	}
 
 	responseWriter.WriteHeader(http.StatusOK)
+}
+
+// HttpServer request handler for information_schema requests
+func informationSchemaRequestHandler(responseWriter http.ResponseWriter, request *http.Request, database *sql.Database) {
+
 }
