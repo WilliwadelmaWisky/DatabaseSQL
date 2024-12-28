@@ -35,6 +35,7 @@ func (operation *InsertOperation) Call(database *Database) ([]byte, error) {
 	}
 
 	err = table.Insert(operation.Data)
+	database.Save()
 	return nil, err
 }
 
@@ -81,6 +82,7 @@ func (operation *UpdateOperation) Call(database *Database) ([]byte, error) {
 	}
 
 	err = table.Update(operation.Data, operation.Filters)
+	database.Save()
 	return nil, err
 }
 
@@ -98,5 +100,6 @@ func (operation *DeleteOperation) Call(database *Database) ([]byte, error) {
 	}
 
 	err = table.Delete(operation.Filters)
+	database.Save()
 	return nil, err
 }

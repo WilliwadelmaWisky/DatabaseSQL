@@ -7,15 +7,14 @@ import (
 
 // Represents a single table in the database
 type Table struct {
-	Name    string    `json:"table"`
-	Columns []*Column `json:"columns"`
+	Name    string    `json:"table"`   // Table name
+	Columns []*Column `json:"columns"` // Table columns
 }
 
 // An object to return by get method
 type TableData struct {
-	ColumnNames []string   `json:"column_names"`
-	Rows        [][]string `json:"rows"`
-	RowCount    int        `json:"row_count"`
+	Columns []string   `json:"columns"` // Table column name array
+	Data    [][]string `json:"data"`    // Table data, array of rows
 }
 
 type RowData struct {
@@ -52,9 +51,8 @@ func (table *Table) Get(columnNames []string, filters []*Filter) (*TableData, er
 	rowCount := len(table.Columns[0].Values)
 	columns := table.getColumns(columnNames)
 	data := &TableData{
-		ColumnNames: Map(columns, func(col *Column) string { return col.Name }),
-		Rows:        [][]string{},
-		RowCount:    0,
+		Columns: Map(columns, func(col *Column) string { return col.Name }),
+		Data:    [][]string{},
 	}
 
 	for rowIndex := 0; rowIndex < rowCount; rowIndex++ {
@@ -68,8 +66,7 @@ func (table *Table) Get(columnNames []string, filters []*Filter) (*TableData, er
 			obj[colIndex] = value
 		}
 
-		data.Rows = append(data.Rows, obj)
-		data.RowCount++
+		data.Data = append(data.Data, obj)
 	}
 
 	return data, nil

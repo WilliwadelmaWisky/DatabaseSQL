@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -56,14 +57,14 @@ func main() {
 }
 
 // HttpServer request handler for sql requests
-func sqlRequestHandler(responseWriter http.ResponseWriter, request *http.Request, database *sql.Database) {
-	bytes, _ := io.ReadAll(request.Body)
+func sqlRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Database) {
+	bytes, _ := io.ReadAll(r.Body)
 	fmt.Printf("[SQL]: %s\n", string(bytes))
 
 	tokens := sql.Tokenize(bytes)
 	if len(tokens) == 0 {
 		fmt.Print("[ERROR]: No tokens received from request\n")
-		responseWriter.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -76,29 +77,46 @@ func sqlRequestHandler(responseWriter http.ResponseWriter, request *http.Request
 	operation, err := sql.Parse(tokens)
 	if err != nil {
 		fmt.Printf("[ERROR]: %s\n", err.Error())
-		responseWriter.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	result, err := operation.Call(database)
 	if err != nil {
 		fmt.Printf("[ERROR]: %s\n", err.Error())
-		responseWriter.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if result != nil {
-		responseWriter.Header().Add("Content-Length", strconv.Itoa(len(result)))
-		responseWriter.Header().Add("Content-Type", "application/json")
-		responseWriter.WriteHeader(http.StatusOK)
-		responseWriter.Write(result)
+		w.Header().Add("Content-Length", strconv.Itoa(len(result)))
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(result)
 		return
 	}
 
-	responseWriter.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK)
 }
 
 // HttpServer request handler for information_schema requests
-func informationSchemaRequestHandler(responseWriter http.ResponseWriter, request *http.Request, database *sql.Database) {
+func informationSchemaRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Database) {
+	informationSchema := sql.NewInformationSchema(database)
+	bytes, err := json.Marshal(informationSchema)
 
+	if err != nil {
+		fmt.Printf("[ERROR]: %s\n", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if bytes != nil {
+		w.Header().Add("Content-Length", strconv.Itoa(len(bytes)))
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(bytes)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

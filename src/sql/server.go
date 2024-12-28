@@ -8,15 +8,15 @@ import (
 
 // Represents an http server
 type Server struct {
-	Addr   string
-	Routes []Route
+	Addr   string  // Server address eg. localhost:8080
+	Routes []Route // Server routes
 }
 
 // Represents a single route on the server
 type Route struct {
-	URI        string
-	MethodFlag HttpMethod
-	Handler    http.HandlerFunc
+	URI        string           // Route path eg. /path/to/resource
+	MethodFlag HttpMethod       // Http methods allowed in the route, can be multiple
+	Handler    http.HandlerFunc // Route handler function
 }
 
 // Enum to represent an http method, values are prefixed with HTTP.
@@ -24,16 +24,11 @@ type Route struct {
 type HttpMethod int
 
 const (
-	// Represents an http get request
-	HTTP_GET HttpMethod = 1
-	// Represents an http post request
-	HTTP_POST HttpMethod = 2
-	// Represents an http put request
-	HTTP_PUT HttpMethod = 4
-	// Represents an http delete request
-	HTTP_DELETE HttpMethod = 8
-	// Represents any http request
-	HTTP_ALL HttpMethod = HTTP_GET | HTTP_POST | HTTP_PUT | HTTP_DELETE
+	HTTP_GET    HttpMethod = 1                                             // Represents an http get request
+	HTTP_POST   HttpMethod = 2                                             // Represents an http post request
+	HTTP_PUT    HttpMethod = 4                                             // Represents an http put request
+	HTTP_DELETE HttpMethod = 8                                             // Represents an http delete request
+	HTTP_ALL    HttpMethod = HTTP_GET | HTTP_POST | HTTP_PUT | HTTP_DELETE // Represents any http request
 )
 
 // Starts a server
@@ -60,29 +55,28 @@ func (route *Route) IsAllowedMethod(method HttpMethod) bool {
 
 // Check if route allows http requests of a certain method string (not casesensitive).
 // Empty string is interpreted as a GET request
-func (route *Route) IsAllowedMethodString(method string) bool {
-	m, err := GetMethod(method)
+func (route *Route) IsAllowedMethodString(s string) bool {
+	method, err := GetMethod(s)
 	if err != nil {
 		return false
 	}
 
-	return route.IsAllowedMethod(m)
+	return route.IsAllowedMethod(method)
 }
 
 // Get an http method from a string (not casesensitive).
 // Empty string is interpreted as a GET request
-func GetMethod(method string) (HttpMethod, error) {
-	s := strings.ToUpper(method)
-	switch {
-	case s == "" || s == "GET":
+func GetMethod(s string) (HttpMethod, error) {
+	switch strings.ToUpper(s) {
+	case "", "GET":
 		return HTTP_GET, nil
-	case s == "POST":
+	case "POST":
 		return HTTP_POST, nil
-	case s == "PUT":
+	case "PUT":
 		return HTTP_PUT, nil
-	case s == "DELETE":
+	case "DELETE":
 		return HTTP_DELETE, nil
 	}
 
-	return -1, fmt.Errorf("invalid method as input: %s", method)
+	return -1, fmt.Errorf("invalid method as input: %s", s)
 }

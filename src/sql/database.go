@@ -7,8 +7,8 @@ import (
 
 // Represents a single databse
 type Database struct {
-	rootPath string
-	tables   []*Table
+	rootPath string   // Database location on the disk
+	tables   []*Table // Database tables
 }
 
 // Create a new database.
@@ -17,6 +17,18 @@ func NewDatabase(rootPath string, tables ...*Table) *Database {
 	return &Database{
 		rootPath: rootPath,
 		tables:   tables,
+	}
+}
+
+// Represents a metadata of the database
+type InformationSchema struct {
+	Tables []string `json:"tables"`
+}
+
+// Create a new information_schema
+func NewInformationSchema(database *Database) *InformationSchema {
+	return &InformationSchema{
+		Tables: Map(database.tables, func(table *Table) string { return table.Name }),
 	}
 }
 
@@ -49,10 +61,10 @@ func (database *Database) Create(tableName string, data []ColData) {
 
 // Write database to disk
 func (database *Database) Save() {
-
+	fmt.Printf("Save databse to %s\n", database.rootPath)
 }
 
 // Read database from disk
 func (database *Database) Load() {
-	fmt.Printf("Path: %s\n", database.rootPath)
+	fmt.Printf("Load database from %s\n", database.rootPath)
 }
