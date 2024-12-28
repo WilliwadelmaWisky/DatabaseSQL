@@ -123,14 +123,13 @@ For the first select expression returned data is in the following format.
 
 ```json
 {
-    "column_names": ["id", "name", "age"],
-    "rows": [
+    "columns": ["id", "name", "age"],
+    "data": [
         ["1", "Artist 1", "50"],
         ["2", "Artist 2", "25"],
         ["3", "Artist 3", "45"],
         ["4", "Artist 4", "0"],
-    ],
-    "row_count": 4
+    ]
 }
 ```
 
@@ -172,4 +171,17 @@ DELETE FROM artists
 -- Delete artist that has id=1
 DELETE FROM artists
 WHERE id = 1
+```
+
+### Delete an existing table
+
+**NOT IMPLEMENTED YET!**
+
+<p align="justify">
+    A table can be deleted from the database.
+</p>
+
+```sql
+-- Delete the artists table
+DROP TABLE artists
 ```
