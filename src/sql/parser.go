@@ -22,6 +22,8 @@ func Parse(tokens []*Token) (Operation, error) {
 		return parseUpdate(tokens, 1)
 	case "DELETE":
 		return parseDelete(tokens, 1)
+	case "DROP":
+		return parseDrop(tokens, 1)
 	}
 
 	return nil, fmt.Errorf("any operation could not be created, invalid or not supported operation")
@@ -248,6 +250,18 @@ func parseDelete(tokens []*Token, index int) (Operation, error) {
 	return &DeleteOperation{
 		TableName: tableName,
 		Filters:   filters,
+	}, nil
+}
+
+// Parse a drop operation
+func parseDrop(tokens []*Token, index int) (Operation, error) {
+	if strings.ToUpper(tokens[index].Value) != "TABLE" {
+		return nil, fmt.Errorf("drop operation could not be created, missing table keyword")
+	}
+
+	tableName := tokens[index+1].Value
+	return &DropOperation{
+		TableName: tableName,
 	}, nil
 }
 

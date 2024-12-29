@@ -17,7 +17,11 @@ type CreateOperation struct {
 
 // Create operation execute method, creates a new table with table_name in the database with the data in the operation
 func (operation *CreateOperation) Call(database *Database) ([]byte, error) {
-	database.Create(operation.TableName, operation.Data)
+	err := database.Create(operation.TableName, operation.Data)
+	if err != nil {
+		return nil, err
+	}
+
 	database.Save()
 	return nil, nil
 }
@@ -36,6 +40,10 @@ func (operation *InsertOperation) Call(database *Database) ([]byte, error) {
 	}
 
 	err = table.Insert(operation.Data)
+	if err != nil {
+		return nil, err
+	}
+
 	database.Save()
 	return nil, err
 }
@@ -83,6 +91,10 @@ func (operation *UpdateOperation) Call(database *Database) ([]byte, error) {
 	}
 
 	err = table.Update(operation.Data, operation.Filters)
+	if err != nil {
+		return nil, err
+	}
+
 	database.Save()
 	return nil, err
 }
@@ -101,6 +113,26 @@ func (operation *DeleteOperation) Call(database *Database) ([]byte, error) {
 	}
 
 	err = table.Delete(operation.Filters)
+	if err != nil {
+		return nil, err
+	}
+
 	database.Save()
 	return nil, err
+}
+
+// Sql drop operation, for deleting tables from the database
+type DropOperation struct {
+	TableName string
+}
+
+// Drop operation execute method, deletes the table from the database
+func (operation *DropOperation) Call(database *Database) ([]byte, error) {
+	err := database.Delete(operation.TableName)
+	if err != nil {
+		return nil, err
+	}
+
+	database.Save()
+	return nil, nil
 }

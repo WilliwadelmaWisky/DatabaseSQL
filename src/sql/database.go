@@ -43,7 +43,12 @@ func (database *Database) Get(tableName string) (*Table, error) {
 }
 
 // Create a new empty table in the database
-func (database *Database) Create(tableName string, data []ColData) {
+func (database *Database) Create(tableName string, data []ColData) error {
+	index := slices.IndexFunc(database.tables, func(t *Table) bool { return t.Name == tableName })
+	if index != -1 {
+		return fmt.Errorf("table already exists: %s", tableName)
+	}
+
 	columns := []*Column{}
 	for _, colData := range data {
 		columns = append(columns, &Column{
@@ -57,6 +62,19 @@ func (database *Database) Create(tableName string, data []ColData) {
 		Name:    tableName,
 		Columns: columns,
 	})
+
+	return nil
+}
+
+// Delete a table from the database
+func (database *Database) Delete(tableName string) error {
+	index := slices.IndexFunc(database.tables, func(t *Table) bool { return t.Name == tableName })
+	if index == -1 {
+		return fmt.Errorf("table not found: %s", tableName)
+	}
+
+	database.tables = slices.Delete(database.tables, index, index+1)
+	return nil
 }
 
 // Write database to disk
