@@ -6,7 +6,7 @@
     An extremely simple local sql database that supports only a few of the sql keywords. The data can be requested/updated from the server by http post request at root. The data is send in json format as http response if the request sql is in correct format. The application supports only a single sql query send a single post request.
 </p>
 
-**NOT READY TO BE USED YET!!!**
+**NOT READY TO BE USED YET, CURRENTLY DATABASE DOES NOT SAVE ANYTHING ON THE DISK AND THERE ARE STILL SOME ERRORS WHEN SQL SYNTAX IS INVALID!!!**
 
 ## Getting Started
 Clone the repository.
@@ -28,13 +28,19 @@ go run . [URI] [PORT]
 ```
 
 > [!NOTE]
-> URI can be specified (defaults to **default**). URI defines to location of the database files on the disk, nested directories should be separeated by '/' on all operating systems.
+> URI can be specified (defaults to **default**). URI defines to location of the database files on the disk, nested directories should be separeated by '/' on all operating systems. The absolute path on the is '*USER_HOME/default*' by default.
 > Port can be specified (defaults to **9000**). Port is checked from the second argument so URI must be specified before.
 
-Communicate with the database via curl or some other tool.
+Communicate with the database via curl or some other tool. More details about the supported syntax on features.
 
 ```
 curl -i -X POST -d "SELECT * FROM table" localhost:9000
+```
+
+The database metadata, such as all the tables, can be requested with curl or some other tool.
+
+```
+curl localhost:9000/information_schema
 ```
 
 > [!NOTE]
@@ -42,7 +48,7 @@ curl -i -X POST -d "SELECT * FROM table" localhost:9000
 
 ## Features
 <p align="justify">
-    The database supports all the basic CRUD operations Examples on the supported sql syntax below. If you want to use values with spaces, only single quotes are supported. Syntax allows additional spaces/newlines in the sql expressions and is not case sensitive.
+    The database supports all the basic CRUD operations Examples on the supported sql syntax below. If you want to use values with spaces, only single quotes are supported. Syntax allows additional spaces/newlines in the sql expressions and is not case sensitive. The database http server has cors enabled so browser can communicate with the server.
 </p>
 
 ### Create a new Table
@@ -175,10 +181,8 @@ WHERE id = 1
 
 ### Delete an existing table
 
-**NOT IMPLEMENTED YET!**
-
 <p align="justify">
-    A table can be deleted from the database.
+    A table can be deleted from the database. Let's delete the <i>artists</i> table created above.
 </p>
 
 ```sql
