@@ -91,6 +91,7 @@ func sqlRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Dat
 	if result != nil {
 		w.Header().Add("Content-Length", strconv.Itoa(len(result)))
 		w.Header().Add("Content-Type", "application/json")
+		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		w.Write(result)
 		return
@@ -113,6 +114,7 @@ func informationSchemaRequestHandler(w http.ResponseWriter, r *http.Request, dat
 	if bytes != nil {
 		w.Header().Add("Content-Length", strconv.Itoa(len(bytes)))
 		w.Header().Add("Content-Type", "application/json")
+		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		w.Write(bytes)
 		return
