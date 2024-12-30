@@ -3,10 +3,11 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)
 
 <p align="justify">
-    An extremely simple local sql database that supports only a few of the sql keywords. The data can be requested/updated from the server by http post request at root. The data is send in json format as http response if the request sql is in correct format. The application supports only a single sql query send a single post request.
+    An extremely simple local sql database that supports only a few of the sql keywords. The data can be requested and updated on the server by http post request at root. The data is send back in json format as http response if the request sql is in allowed format. The application supports only a single sql query send in a single post request. The database server has cors enabled so it can be used together with a javascript frontend application for example.
 </p>
 
-**NOT READY TO BE USED YET, CURRENTLY DATABASE DOES NOT SAVE ANYTHING ON THE DISK AND THERE ARE STILL SOME ERRORS WHEN SQL SYNTAX IS INVALID!!!**
+> [!WARNING]
+> There are still some errors when sql syntax is invalid, but the database is usable.
 
 ## Getting Started
 Clone the repository.
@@ -28,19 +29,13 @@ go run . [URI] [PORT]
 ```
 
 > [!NOTE]
-> URI can be specified (defaults to **default**). URI defines to location of the database files on the disk, nested directories should be separeated by '/' on all operating systems. The absolute path on the is '*USER_HOME/default*' by default.
+> URI can be specified (defaults to **/default**). URI defines the location of the database files on the disk, nested directories should be separeated by '/' on all operating systems. The absolute path on the is '*USER_HOME/default*' by default.
 > Port can be specified (defaults to **9000**). Port is checked from the second argument so URI must be specified before.
 
 Communicate with the database via curl or some other tool. More details about the supported syntax on features.
 
 ```
-curl -i -X POST -d "SELECT * FROM table" localhost:9000
-```
-
-The database metadata, such as all the tables, can be requested with curl or some other tool.
-
-```
-curl localhost:9000/information_schema
+curl -X POST -d "SELECT * FROM table" localhost:9000
 ```
 
 > [!NOTE]
@@ -48,13 +43,15 @@ curl localhost:9000/information_schema
 
 ## Features
 <p align="justify">
-    The database supports all the basic CRUD operations Examples on the supported sql syntax below. If you want to use values with spaces, only single quotes are supported. Syntax allows additional spaces/newlines in the sql expressions and is not case sensitive. The database http server has cors enabled so browser can communicate with the server.
+    The database supports all the basic CRUD operations Examples on the supported sql syntax below. Syntax allows additional spaces/newlines in the sql expressions and is not case sensitive. The database http server has cors enabled so browser can communicate with the server.
 </p>
 
-### Create a new Table
+> [!IMPORTANT]
+> If you want to use values with spaces, only single quotes are supported `'value with spaces'`.
 
+### Create a new Table
 <p align="justify">
-    Table can be created with different attributes. Attributes must be inside parentheses. However there is no support for marking a primary key or to force any restrictions such as not null. The sql processor also supports only number and text values. Let's create a table named <i>artists</i> as an example. A single artist in a table contains an <i>id</i> (int), a <i>name</i> (string) and an <i>age</i> (int).
+    Table can be created with different attributes. Attributes must be inside parentheses. However there is no support for marking a primary key or to force any restrictions such as not null. The sql processor also supports only number and text values. Let's create a table named <i>artists</i> as an example. A single artist in a table contains an <i>id</i> (int), a <i>name</i> (string) and an <i>age</i> (int). Data is saved automatically on disk after the table gets created.
 </p>
 
 ```sql
@@ -66,13 +63,12 @@ CREATE TABLE artists (
 )
 ```
 
-> [!NOTE]
-> Different attributes must be separated by a comma and must be specified inside parentheses!
+> [!IMPORTANT]
+> Different attributes must be separated by a comma and must be specified inside parentheses! Table names must be unique.
 
 ### Insert data to a table
-
 <p align="justify">
-    Data can be inserted to a table with basic sql insert into syntax. Every attribute does not have to be explicitly typed. If an attribute is not inserted it will be initialized to a default value. Let's insert some data to the <i>artists</i> table we created above.
+    Data can be inserted to a table with basic sql insert into syntax. Every attribute does not have to be explicitly typed. If an attribute is not inserted it will be initialized to a default value. Let's insert some data to the <i>artists</i> table we created above. Data is saved automatically on disk after data is inserted.
 </p>
 
 ```sql
@@ -93,13 +89,12 @@ INSERT INTO artists (id, name)
 VALUES (4, 'Artist 4')
 ```
 
-> [!NOTE]
+> [!IMPORTANT]
 > Only single sql expression can be sent at a time so doing the previous four expression cannot be sent at the same time. Different attributes must be separated by a comma and parentheses must be used! Note that last artist will now have default age of 0.
 
 ### Fetch data from a table
-
 <p align="justify">
-    Data can be fetch from a single table with basic sql select syntax. A single column or many columns can be requested from a table at the same time. items can be filtered with a where keyword and ordered with order by. Let's fetch some data from the <i>artists</i> table created above.
+    Data can be fetch from a single table with basic sql select syntax. A single column or many columns can be requested from a table at the same time. items can be filtered with a where keyword and ordered with order by. Let's fetch some data from the <i>artists</i> table created above. Does not load or save data on disk.
 </p>
 
 ```sql
@@ -122,8 +117,8 @@ ORDER BY name ASC
 ORDER BY age DESC
 ```
 
-> [!NOTE]
-> Select supports only selecting columns from a single table, however many columns can be requested separated with comma. Where supports only one condition, multiple where statements can however be combined. But testing value in range is possible, for example `0 <= x <= 1`. 
+> [!IMPORTANT]
+> Select supports only selecting columns from a single table, however many columns can be requested separated with comma. Where supports only one condition, multiple where statements can however be combined. But testing value in range is possible, for example `40 <= x <= 49`. When comparing to single value, for example `age > 40`, table name must be on the left side of the operator.
 
 For the first select expression returned data is in the following format.
 
@@ -140,9 +135,8 @@ For the first select expression returned data is in the following format.
 ```
 
 ### Update data in a table
-
 <p align="justify">
-    A data can be updated with update syntax. A filter, to which items are updated, can be specified with where syntax. A single item or many items can be updated at the same time. Attributes to be updated and their new values must be inside parentheses after set. Let's update the <i>artists</i> table as an example.
+    A data can be updated with update syntax. A filter, to which items are updated, can be specified with where syntax. A single item or many items can be updated at the same time. Attributes to be updated and their new values must be inside parentheses after set. Let's update the <i>artists</i> table as an example. Data is saved automatically on disk after data is updated.
 </p>
 
 ```sql
@@ -161,13 +155,12 @@ VALUES ('Artist 11', 60)
 WHERE id = 1
 ```
 
-> [!NOTE]
+> [!IMPORTANT]
 > Attributes must be separated by a comma and parentheses are important!
 
 ### Delete data from a table
-
 <p align="justify">
-    A single item or many items can be deleted with delete. Item filter can be specified with a where keyword. Let's delete some data from the <i>artists</i> table created above.
+    A single item or many items can be deleted with delete. Item filter can be specified with a where keyword. Let's delete some data from the <i>artists</i> table created above. Data is saved automatically on disk after data is deleted.
 </p>
 
 ```sql
@@ -180,12 +173,24 @@ WHERE id = 1
 ```
 
 ### Delete an existing table
-
 <p align="justify">
-    A table can be deleted from the database. Let's delete the <i>artists</i> table created above.
+    A table can be deleted from the database. Let's delete the <i>artists</i> table created above. Data is saved automatically on disk after table is deleted.
 </p>
 
 ```sql
 -- Delete the artists table
 DROP TABLE artists
+```
+
+### Getting database metadata
+<p align="justify">
+    The database metadata can be requested from `localhost:9000/information_schema` as a http get request (change the <i>9000</i> to correct port). 
+</p>
+
+The metadata is send in a following format as json.
+
+```json
+{
+    "tables": ["artists"]
+}
 ```
