@@ -1,8 +1,13 @@
 package sql
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"slices"
+	"strings"
 )
 
 // Represents a single databse
@@ -78,11 +83,67 @@ func (database *Database) Delete(tableName string) error {
 }
 
 // Write database to disk
-func (database *Database) Save() {
-	fmt.Printf("Save databse to %s\n", database.rootPath)
+func (database *Database) Save() error {
+	fmt.Printf("Save: %s\n", database.rootPath)
+
+	files, err := os.ReadDir(database.rootPath)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		filePath := filepath.Join(database.rootPath, file.Name())
+		if !strings.HasSuffix(filePath, ".json") {
+			continue
+		}
+
+		os.Remove(filePath)
+	}
+
+	for _, table := range database.tables {
+		filePath := filepath.Join(database.rootPath, fmt.Sprintf("%s.json", table.Name))
+		data, err := json.Marshal(table)
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(filePath, data, fs.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Read database from disk
-func (database *Database) Load() {
-	fmt.Printf("Load database from %s\n", database.rootPath)
+func (database *Database) Load() error {
+	fmt.Printf("Load: %s\n", database.rootPath)
+
+	files, err := os.ReadDir(database.rootPath)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		filePath := filepath.Join(database.rootPath, file.Name())
+		if !strings.HasSuffix(filePath, ".json") {
+			continue
+		}
+
+		data, err := os.ReadFile(filePath)
+		if err != nil {
+			return err
+		}
+
+		table := &Table{}
+		err = json.Unmarshal(data, table)
+		if err != nil {
+			return err
+		}
+
+		database.tables = append(database.tables, table)
+	}
+
+	return nil
 }

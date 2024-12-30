@@ -33,8 +33,16 @@ func main() {
 
 	homeDir, _ := os.UserHomeDir()
 	path := filepath.Join(append([]string{homeDir, ".WilliwadelmaWisky", "DatabaseSQL"}, strings.Split(url, "/")...)...)
+	err := os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+	}
+
 	database := sql.NewDatabase(path)
-	database.Load()
+	err = database.Load()
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+	}
 
 	server := &sql.Server{
 		Addr: fmt.Sprintf("localhost:%d", port),

@@ -22,8 +22,8 @@ func (operation *CreateOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	database.Save()
-	return nil, nil
+	err = database.Save()
+	return nil, err
 }
 
 // Sql insert operation, for inserting data to existing tables
@@ -44,7 +44,7 @@ func (operation *InsertOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	database.Save()
+	err = database.Save()
 	return nil, err
 }
 
@@ -95,7 +95,7 @@ func (operation *UpdateOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	database.Save()
+	err = database.Save()
 	return nil, err
 }
 
@@ -117,7 +117,7 @@ func (operation *DeleteOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	database.Save()
+	err = database.Save()
 	return nil, err
 }
 
@@ -133,6 +133,6 @@ func (operation *DropOperation) Call(database *Database) ([]byte, error) {
 		return nil, err
 	}
 
-	database.Save()
-	return nil, nil
+	err = database.Save()
+	return nil, err
 }
