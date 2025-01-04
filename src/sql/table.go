@@ -13,9 +13,9 @@ type Table struct {
 
 // An object to return by get method
 type TableData struct {
-	Columns     []string     `json:"columns"`      // Table column name array
-	ColumnTypes []ColumnType `json:"column_types"` // Table column type array
-	Data        [][]string   `json:"data"`         // Table data, array of rows
+	Columns     []string   `json:"columns"`      // Table column name array
+	ColumnTypes []string   `json:"column_types"` // Table column type array
+	Data        [][]string `json:"data"`         // Table data, array of rows
 }
 
 type RowData struct {
@@ -60,7 +60,7 @@ func (table *Table) Get(columnNames []string, filters []*Filter, sorters []*Sort
 	sortData := []*SortData{}
 	data := &TableData{
 		Columns:     Map(columns, func(col *Column) string { return col.Name }),
-		ColumnTypes: Map(columns, func(col *Column) ColumnType { return col.Type }),
+		ColumnTypes: Map(columns, func(col *Column) string { return col.Type.ToString() }),
 		Data:        [][]string{},
 	}
 
