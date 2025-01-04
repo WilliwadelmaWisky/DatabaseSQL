@@ -66,6 +66,8 @@ func main() {
 
 // HttpServer request handler for sql requests
 func sqlRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Database) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
 	bytes, _ := io.ReadAll(r.Body)
 	fmt.Printf("[SQL]: %s\n", string(bytes))
 
@@ -99,7 +101,6 @@ func sqlRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Dat
 	if result != nil {
 		w.Header().Add("Content-Length", strconv.Itoa(len(result)))
 		w.Header().Add("Content-Type", "application/json")
-		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		w.Write(result)
 		return
@@ -110,6 +111,7 @@ func sqlRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Dat
 
 // HttpServer request handler for information_schema requests
 func informationSchemaRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Database) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 	informationSchema := sql.NewInformationSchema(database)
 	bytes, err := json.Marshal(informationSchema)
 
@@ -122,7 +124,6 @@ func informationSchemaRequestHandler(w http.ResponseWriter, r *http.Request, dat
 	if bytes != nil {
 		w.Header().Add("Content-Length", strconv.Itoa(len(bytes)))
 		w.Header().Add("Content-Type", "application/json")
-		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 		w.Write(bytes)
 		return
