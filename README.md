@@ -125,6 +125,7 @@ For the first select expression returned data is in the following format.
 ```json
 {
     "columns": ["id", "name", "age"],
+    "column_types": ["INT", "VARCHAR", "INT"],
     "data": [
         ["1", "Artist 1", "50"],
         ["2", "Artist 2", "25"],
