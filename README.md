@@ -10,36 +10,26 @@
 > There are still some errors when sql syntax is invalid, but the database is usable.
 
 ## Getting Started
-Clone the repository.
+1. Clone the repository.
+2. Run the start script or optionally run the application manually with `go run`.
+3. Communicate with the database via curl or some other tool. The server has CORS enabled so the database can also be accessed through a web application for example.
 
 ```
 git clone https://github.com/WilliwadelmaWisky/DatabaseSQL.git
 ```
 
-cd to source directory.
-
 ```
-cd DatabaseSQL/src
+./DatabaseSQL/DatabaseSQL.sh <DIRECTORY> [PORT]
 ```
-
-Start the program. 
-
-```
-go run . [URI] [PORT]
-```
-
-> [!NOTE]
-> URI can be specified (defaults to **/default**). URI defines the location of the database files on the disk, nested directories should be separeated by '/' on all operating systems. The absolute path on the is '*USER_HOME/default*' by default.
-> Port can be specified (defaults to **9000**). Port is checked from the second argument so URI must be specified before.
-
-Communicate with the database via curl or some other tool. More details about the supported syntax on features.
 
 ```
 curl -X POST -d "SELECT * FROM table" localhost:9000
 ```
 
-> [!NOTE]
-> If you specified a port use that instead of *9000*.
+> [!IMPORTANT]
+> DIRECTORY is mandatory so it must be excplicitly specified. The DIRECTORY defines the location of the database files on the disk, nested directories should be separeated by '/' on all operating systems. The absolute path on the is`/home/user/DIRECTORY/` for linux and `C:\Users\user\DIRECTORY\` for windows. The DIRECTORY is checked from the first argument.
+> PORT is optional so it can be specified (defaults to **9000**). The server is activated on `localhost:PORT`. The PORT is checked from the second argument.
+> More information can be accessed with `[-h | --help] [-v | --version]` flags as the first argument.
 
 ## Features
 <p align="justify">
