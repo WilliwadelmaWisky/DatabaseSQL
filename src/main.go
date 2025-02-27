@@ -15,11 +15,22 @@ import (
 
 // Main function
 func main() {
-	url := "default"
-	if len(os.Args) > 1 {
-		url = os.Args[1]
+	if len(os.Args) <= 1 {
+		fmt.Println("No arguments were given to the script! Use --help to get more information.")
+		return
 	}
 
+	if os.Args[1] == "-h" || os.Args[1] == "--help" {
+		fmt.Println("Print help")
+		return
+	}
+
+	if os.Args[1] == "-v" || os.Args[1] == "--version" {
+		fmt.Println("Print version")
+		return
+	}
+
+	url := os.Args[1]
 	port := 9000
 	if len(os.Args) > 2 {
 		value, err := strconv.Atoi(os.Args[2])
@@ -66,8 +77,6 @@ func main() {
 
 // HttpServer request handler for sql requests
 func sqlRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Database) {
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-
 	bytes, _ := io.ReadAll(r.Body)
 	fmt.Printf("[SQL]: %s\n", string(bytes))
 
@@ -111,7 +120,6 @@ func sqlRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Dat
 
 // HttpServer request handler for information_schema requests
 func informationSchemaRequestHandler(w http.ResponseWriter, r *http.Request, database *sql.Database) {
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 	informationSchema := sql.NewInformationSchema(database)
 	bytes, err := json.Marshal(informationSchema)
 

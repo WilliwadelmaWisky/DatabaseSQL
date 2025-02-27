@@ -8,7 +8,7 @@ import (
 // Parse tokens to sql expression
 func Parse(tokens []*Token) (Operation, error) {
 	if len(tokens) <= 0 {
-		return nil, fmt.Errorf("any operation could not be created, no tokens")
+		return nil, fmt.Errorf("parser: no operation could be created, no tokens")
 	}
 
 	switch strings.ToUpper(tokens[0].Value) {
@@ -26,18 +26,21 @@ func Parse(tokens []*Token) (Operation, error) {
 		return parseDrop(tokens, 1)
 	}
 
-	return nil, fmt.Errorf("any operation could not be created, invalid or not supported operation")
+	return nil, fmt.Errorf("parser: no operation could be created, invalid operation")
 }
 
 // Parse a select operation
 func parseSelect(tokens []*Token, index int) (Operation, error) {
-	columnNames := []string{}
+	if len(tokens) <= 1 {
+		return nil, fmt.Errorf("parser: select operation could not be created, missing columns")
+	}
 
+	columnNames := []string{}
 	for i := index; i < len(tokens); i += 2 {
 		columnName := tokens[i].Value
 		columnNames = append(columnNames, columnName)
 
-		if tokens[i+1].Type == TOKEN_COMMA {
+		if len(tokens) > i+1 && tokens[i+1].Type == TOKEN_COMMA {
 			continue
 		}
 
@@ -45,8 +48,12 @@ func parseSelect(tokens []*Token, index int) (Operation, error) {
 		break
 	}
 
-	if strings.ToUpper(tokens[index].Value) != "FROM" {
-		return nil, fmt.Errorf("select operation could not be created, missing from keyword")
+	if len(tokens) <= index || strings.ToUpper(tokens[index].Value) != "FROM" {
+		return nil, fmt.Errorf("parser: select operation could not be created, missing the 'from' keyword")
+	}
+
+	if len(tokens) <= index + 1 {
+		return nil, fmt.Errorf("parser: select operation could not be created, missing tablename")
 	}
 
 	tableName := tokens[index+1].Value
@@ -73,7 +80,7 @@ func parseSelect(tokens []*Token, index int) (Operation, error) {
 			continue
 		}
 
-		return nil, fmt.Errorf("select operation could not be created, invalid syntax after table name")
+		return nil, fmt.Errorf("parser: select operation could not be created, invalid keyword '%s' after tablename", tokens[index].Value)
 	}
 
 	return &SelectOperation{

@@ -35,6 +35,7 @@ const (
 func (s *Server) ListenAndServe() {
 	for _, route := range s.Routes {
 		http.HandleFunc(route.URI, func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Access-Control-Allow-Origin", "*")
 			if r.RequestURI != route.URI || !route.IsAllowedMethodString(r.Method) {
 				fmt.Printf("[SERVER] Request failed at %s, method: %s\n", r.RequestURI, r.Method)
 				w.WriteHeader(http.StatusBadRequest)
